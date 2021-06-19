@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class User {
+export class Users {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -9,7 +9,10 @@ export class User {
   email: string;
 
   @Column()
-  password: string;
+  hash: string;
+
+  @Column()
+  salt: string;
 
   @Column({ default: true })
   isActive: boolean;
