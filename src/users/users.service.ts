@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { DatabaseUserDto } from './dto/database-user.dto';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
-import { Users } from './entities/user.entity';
+import { Users } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
