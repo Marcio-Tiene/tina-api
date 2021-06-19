@@ -1,0 +1,10 @@
+{
+  "type": "postgres",
+  "url": "postgresql://tina:123456marcio@localhost:5432/tina-db",
+  "synchronize": false,
+  "autoLoadEntities": true,
+  "migrationsRun": true,
+  "migrations": ["src/migrations/*{.ts,.js}"],
+  
+  "migrationsTableName": "migrations_typeorm"
+}
