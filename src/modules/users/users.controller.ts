@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Injectable,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { UserView } from './dto/user-view.dto';
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 const name = process.env.API_HEADER_NAME;
@@ -28,8 +28,8 @@ const name = process.env.API_HEADER_NAME;
 @Controller('users')
 @ApiHeader({
   name,
-  required: true,
   description: 'Secret Key',
+  required: true,
 })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

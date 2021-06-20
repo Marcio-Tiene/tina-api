@@ -7,7 +7,6 @@ import {
   SwaggerDocumentOptions,
 } from '@nestjs/swagger';
 import * as helmet from 'helmet';
-import { type } from './ormconfig';
 
 const { PORT } = process.env;
 
@@ -27,10 +26,7 @@ async function serverInit() {
         'https://github.com/Marcio-Tiene/tina-api/blob/main/LICENSE',
       )
       .setVersion('1.0')
-      .addSecurity('apiKey', {
-        type: 'apiKey',
-        name: `${process.env.API_HEADER_NAME}`,
-      })
+
       .build();
 
     const swaggerDocumentOptions: SwaggerDocumentOptions = {
