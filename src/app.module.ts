@@ -1,14 +1,13 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from './users/users.module';
+import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as ormconfig from './ormconfig';
+import { AppHeaderMiddleware } from './middlewares/app-header.middleware';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ envFilePath: ['.env'], isGlobal: true }),
     TypeOrmModule.forRoot({
       ...ormconfig,
       autoLoadEntities: true,
@@ -16,7 +15,9 @@ import * as ormconfig from './ormconfig';
     }),
     UsersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AppHeaderMiddleware).forRoutes('/**');
+  }
+}

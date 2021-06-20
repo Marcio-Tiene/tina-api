@@ -7,7 +7,8 @@ import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import { Users } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserView } from './dto/user-vew.dto';
+import { UserView } from './dto/user-view.dto';
+import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @Injectable()
 export class UsersService {
@@ -43,18 +44,31 @@ export class UsersService {
 
   async findOne(userId: string): Promise<UserView | Error> {
     try {
-      const { email, id, isActive } = await this.usersRepository.findOneOrFail(
-        userId,
-      );
-      const userview = { email, id, isActive };
-      return userview;
+      const user = await this.usersRepository.findOneOrFail(userId);
+
+      return this.userView(user);
     } catch (err) {
       return err;
     }
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserView> {
+    try {
+      if (updateUserDto.password) throw HttpErrorByCode[401];
+
+      const user = await this.usersRepository.findOneOrFail(userId);
+      const updatedUser = await this.usersRepository.save({
+        ...user,
+        ...updateUserDto,
+      });
+
+      return this.userView(updatedUser);
+    } catch (err) {
+      return err;
+    }
   }
 
   remove(id: string) {
