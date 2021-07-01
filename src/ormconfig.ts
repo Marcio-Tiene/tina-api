@@ -13,7 +13,7 @@ const config: ConnectionOptions = {
 
   migrationsTableName: 'migrations_typeorm',
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  logging: true,
+  logging: ['migration', 'error'],
   logger: 'advanced-console',
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   cli: {
