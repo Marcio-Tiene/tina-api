@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  ForbiddenException,
+  Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,6 +21,8 @@ import {
 } from '@nestjs/swagger';
 import { UserView } from './dto/user-view.dto';
 import * as dotenv from 'dotenv';
+import { NotFoundError } from 'rxjs';
+import { Response } from 'express';
 
 dotenv.config();
 
@@ -45,14 +49,18 @@ export class UsersController {
   @ApiOkResponse({ type: [UserView] })
   @ApiForbiddenResponse({ description: 'Forbidden.' })
   async findAll() {
+    // fetch('https://api.trumail.io/v2/lookups/json?email=marciorft@yahoo.com.br')
+    //   .then((res) => res.json())
+    //   .then(console.log);
+
     return await this.usersService.findAll();
   }
 
   @Get(':id')
   @ApiOkResponse({ type: UserView })
   @ApiForbiddenResponse({ description: 'Forbidden.' })
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') _id: string) {
+    return this.usersService.findOne(_id);
   }
 
   @Patch(':id')
@@ -62,7 +70,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@Res() res: Response, @Param('id') id: string) {
+    try {
+      return await this.usersService.remove(id);
+    } catch (err) {
+      res.status(404).send(err.message);
+    }
   }
 }

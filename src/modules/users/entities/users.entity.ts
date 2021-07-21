@@ -1,11 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, ObjectIdColumn, ObjectID } from 'typeorm';
 
 @Entity()
 export class Users {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @ObjectIdColumn()
+  _id: ObjectID;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
@@ -16,4 +16,18 @@ export class Users {
 
   @Column({ default: true })
   isActive: boolean;
+
+  // constructor(
+  //   _id: ObjectID,
+  //   email: string,
+  //   hash: string,
+  //   salt: string,
+  //   isActive: boolean,
+  // ) {
+  //   this._id = _id;
+  //   this.email = email;
+  //   this.hash = hash;
+  //   this.salt = salt;
+  //   this.isActive = isActive;
+  // }
 }

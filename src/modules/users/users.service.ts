@@ -1,50 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpCode, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { DatabaseUserDto } from './dto/database-user.dto';
-import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import { DeleteResult, MongoRepository } from 'typeorm';
+
 import { Users } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserView } from './dto/user-view.dto';
-import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users)
-    private usersRepository: Repository<Users>,
+    private readonly usersRepository: MongoRepository<Users>,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<UserView | Error> {
     try {
       const salt = await bcrypt.genSalt();
-      const id = randomUUID();
+
       const { password, email } = createUserDto;
       const hash = await bcrypt.hash(password, salt);
-      const user: DatabaseUserDto = { id, email, hash, salt, isActive: true };
+      const user: DatabaseUserDto = {
+        email,
+        hash,
+        salt,
+        isActive: true,
+      };
       const createdUser = this.usersRepository.create(user);
 
       const savedUser = await this.usersRepository.save(createdUser);
 
       return this.userView(savedUser);
     } catch (err) {
-      return err;
+      return err.message;
     }
   }
 
   async findAll(): Promise<UserView[] | Error> {
     try {
       const users = await this.usersRepository.find();
+
       return this.usersView(users);
     } catch (err) {
       return err;
     }
   }
 
-  async findOne(userId: string): Promise<UserView | Error> {
+  async findOne(_id: string): Promise<UserView | Error> {
     try {
-      const user = await this.usersRepository.findOneOrFail(userId);
+      const user = await this.usersRepository.findOneOrFail(_id);
 
       return this.userView(user);
     } catch (err) {
@@ -52,14 +57,14 @@ export class UsersService {
     }
   }
 
-  async update(
-    userId: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UserView> {
+  async update(_id: string, updateUserDto: UpdateUserDto): Promise<UserView> {
     try {
-      if (updateUserDto.password) throw HttpErrorByCode[401];
+      if (updateUserDto.password)
+        throw new ForbiddenException(
+          'Password cannot be changed at this route',
+        );
 
-      const user = await this.usersRepository.findOneOrFail(userId);
+      const user = await this.usersRepository.findOneOrFail(_id);
       const updatedUser = await this.usersRepository.save({
         ...user,
         ...updateUserDto,
@@ -71,8 +76,14 @@ export class UsersService {
     }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(_id: string): Promise<UserView | Error> {
+    try {
+      const user = await this.usersRepository.findOneOrFail(_id);
+      await this.usersRepository.delete(user);
+      return this.userView(user);
+    } catch (err) {
+      throw err;
+    }
   }
 
   userView(user: DatabaseUserDto): UserView {

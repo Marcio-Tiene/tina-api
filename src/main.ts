@@ -1,5 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import 'reflect-metadata';
+
 import {
   SwaggerModule,
   DocumentBuilder,
@@ -46,7 +48,7 @@ async function serverInit() {
       swaggerConfig,
       swaggerDocumentOptions,
     );
-    SwaggerModule.setup('/', app, document, swaggerCustomOptions);
+    SwaggerModule.setup('/api', app, document, swaggerCustomOptions);
     app.enableCors();
     app.use(helmet());
     await app.listen(PORT || 3000);
